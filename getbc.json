@@ -516,21 +516,21 @@
                 "supportsHttpsTrafficOnly": true
             }
         },
-        {
-			  "apiVersion": "2015-05-01-preview",
-			  "type": "Microsoft.Network/publicIPAddresses",
-			  "name": "[variables('publicIPAddressName')]",
-			  "location": "[resourceGroup().location]",
-			  "sku": {
-			    "name": "Standard"
-			  },
-			  "properties": {
-			    "publicIPAllocationMethod": "Static",
-			    "dnsSettings": {
-			      "domainNameLabel": "[variables('dnsName')]"
-			    }
-			  }
-			},
+		{
+		  "apiVersion": "2020-11-01",
+		  "type": "Microsoft.Network/publicIPAddresses",
+		  "name": "[variables('publicIPAddressName')]",
+		  "location": "[resourceGroup().location]",
+		  "sku": {
+		    "name": "Standard"
+		  },
+		  "properties": {
+		    "publicIPAllocationMethod": "Static",
+		    "dnsSettings": {
+		      "domainNameLabel": "[variables('dnsName')]"
+		    }
+		  }
+		},
         {
             "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkSecurityGroups",
@@ -950,32 +950,79 @@
                 }                
             ]
         },
-        {
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('server1Name'),'/vmextension1')]",
-            "location": "[resourceGroup().location]",
- 			"condition": "[equals(variables('acceptEula'),'Yes')]",
-            "tags": {
-                "displayName": "PowerShellScript2"
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('server1Name'))]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.9",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                    "fileUris": [
-                        "[uri(deployment().properties.templateLink.uri, 'initialize.ps1')]"
-                    ],
-                    "commandToExecute": "[concat(variables('ScriptCommandToExecute'),'initialize.ps1',' -TemplateLink \"',deployment().properties.templateLink.uri,'\" -hostName \"',reference(variables('publicIPAddressName')).dnsSettings.fqdn,'\" -AcceptInsiderEula \"',variables('AcceptInsiderEula'),'\" -RemoteDesktopAccess \"',variables('RdpAddresses'),'\" -WinRmAccess \"',variables('winRmAddresses'),'\" -Isolation \"',variables('Isolation'),'\" -VMAdminUsername \"',variables('vmAdminUsername'),'\" -NAVAdminUsername \"',variables('navAdminUsername'),'\" -AzureSQLAdminUsername \"',variables('azureSqlAdminUsername'),'\" -AdminPassword \"',replace(variables('adminPassword'),'\"','\\\"'),'\" -artifactUrl \"',variables('artifactUrl'),'\" -navDockerImage \"',variables('navDockerImage'),'\" -registryUsername \"',variables('registryUsername'),'\" -registryPassword \"',replace(variables('registryPassword'),'\"','\\\"'),'\" -LicenseFileUri \"',variables('licenseFileUri'),'\" -SQLServerType \"',variables('SQLServerType'),'\" -AzureSqlServer \"',if(equals(variables('SQLServerType'),'AzureSQL'),variables('azureSqlServerDnsName'),''),'\" -AppBacpacUri \"',variables('AppBacpacUri'),'\" -TenantBacpacUri \"',variables('TenantBacpacUri'),'\" -IncludeAppUris \"',variables('IncludeAppUris'),'\" -CertificatePfxUrl \"',variables('CertificatePfxUrl'),'\" -CertificatePfxPassword \"',replace(variables('CertificatePfxPassword'),'\"','\\\"'),'\" -PublicDnsName \"',variables('PublicDnsName'),'\" -Multitenant \"',variables('Multitenant'),'\" -TestToolkit \"',variables('TestToolkit'),'\" -AssignPremiumPlan \"',variables('AssignPremiumPlan'),'\" -CreateTestUsers \"',variables('CreateTestUsers'),'\" -CreateAadUsers \"',variables('CreateAadUsers'),'\" -EnableSymbolLoading \"',variables('EnableSymbolLoading'),'\" -IncludeCSIDE \"',variables('IncludeCSIDE'),'\" -IncludeAL \"',variables('IncludeAL'),'\" -ClickOnce \"',variables('ClickOnce'),'\" -EnableTaskScheduler \"',variables('EnableTaskScheduler'),'\" -Office365UserName \"',variables('Office365UserName'),'\" -Office365Password \"',replace(variables('Office365Password'),'\"','\\\"'),'\" -BingMapsKey \"',variables('BingMapsKey'),'\" -finalSetupScriptUrl \"',variables('finalSetupScriptUrl'),'\" -RunWindowsUpdate \"',variables('RunWindowsUpdate'),'\" -ContactEMailForLetsEncrypt \"',variables('ContactEMailForLetsEncrypt'),'\" -style \"',variables('style'),'\" -nchbranch \"',variables('nchbranch'),'\" -containerName \"',variables('containerName'),'\" -AddTraefik \"',variables('AddTraefik'),'\"')]"
-                },
-                "protectedSettings": {}
-            }
-        }
+		{
+		  "apiVersion": "2015-06-15",
+		  "type": "Microsoft.Compute/virtualMachines/extensions",
+		  "name": "[concat(variables('server1Name'),'/vmextension1')]",
+		  "location": "[resourceGroup().location]",
+		  "condition": "[equals(variables('acceptEula'),'Yes')]",
+		  "tags": {
+		    "displayName": "PowerShellScript2"
+		  },
+		  "dependsOn": [
+		    "[concat('Microsoft.Compute/virtualMachines/', variables('server1Name'))]"
+		  ],
+		  "properties": {
+		    "publisher": "Microsoft.Compute",
+		    "type": "CustomScriptExtension",
+		    "typeHandlerVersion": "1.9",
+		    "autoUpgradeMinorVersion": true,
+		    "settings": {
+		      "fileUris": [
+		        "[uri(template().uri, 'initialize.ps1')]"
+		      ],
+		      "commandToExecute": "[concat(
+		        variables('ScriptCommandToExecute'),
+		        'initialize.ps1',
+		        ' -TemplateLink \"', template().uri,
+		        '\" -hostName \"', reference(variables('publicIPAddressName')).dnsSettings.fqdn,
+		        '\" -AcceptInsiderEula \"', variables('AcceptInsiderEula'),
+		        '\" -RemoteDesktopAccess \"', variables('RdpAddresses'),
+		        '\" -WinRmAccess \"', variables('winRmAddresses'),
+		        '\" -Isolation \"', variables('Isolation'),
+		        '\" -VMAdminUsername \"', variables('vmAdminUsername'),
+		        '\" -NAVAdminUsername \"', variables('navAdminUsername'),
+		        '\" -AzureSQLAdminUsername \"', variables('azureSqlAdminUsername'),
+		        '\" -AdminPassword \"', replace(variables('adminPassword'),'\"','\\\"'),
+		        '\" -artifactUrl \"', variables('artifactUrl'),
+		        '\" -navDockerImage \"', variables('navDockerImage'),
+		        '\" -registryUsername \"', variables('registryUsername'),
+		        '\" -registryPassword \"', replace(variables('registryPassword'),'\"','\\\"'),
+		        '\" -LicenseFileUri \"', variables('licenseFileUri'),
+		        '\" -SQLServerType \"', variables('SQLServerType'),
+		        '\" -AzureSqlServer \"', if(equals(variables('SQLServerType'),'AzureSQL'), variables('azureSqlServerDnsName'), ''),
+		        '\" -AppBacpacUri \"', variables('AppBacpacUri'),
+		        '\" -TenantBacpacUri \"', variables('TenantBacpacUri'),
+		        '\" -IncludeAppUris \"', variables('IncludeAppUris'),
+		        '\" -CertificatePfxUrl \"', variables('CertificatePfxUrl'),
+		        '\" -CertificatePfxPassword \"', replace(variables('CertificatePfxPassword'),'\"','\\\"'),
+		        '\" -PublicDnsName \"', variables('PublicDnsName'),
+		        '\" -Multitenant \"', variables('Multitenant'),
+		        '\" -TestToolkit \"', variables('TestToolkit'),
+		        '\" -AssignPremiumPlan \"', variables('AssignPremiumPlan'),
+		        '\" -CreateTestUsers \"', variables('CreateTestUsers'),
+		        '\" -CreateAadUsers \"', variables('CreateAadUsers'),
+		        '\" -EnableSymbolLoading \"', variables('EnableSymbolLoading'),
+		        '\" -IncludeCSIDE \"', variables('IncludeCSIDE'),
+		        '\" -IncludeAL \"', variables('IncludeAL'),
+		        '\" -ClickOnce \"', variables('ClickOnce'),
+		        '\" -EnableTaskScheduler \"', variables('EnableTaskScheduler'),
+		        '\" -Office365UserName \"', variables('Office365UserName'),
+		        '\" -Office365Password \"', replace(variables('Office365Password'),'\"','\\\"'),
+		        '\" -BingMapsKey \"', variables('BingMapsKey'),
+		        '\" -finalSetupScriptUrl \"', variables('finalSetupScriptUrl'),
+		        '\" -RunWindowsUpdate \"', variables('RunWindowsUpdate'),
+		        '\" -ContactEMailForLetsEncrypt \"', variables('ContactEMailForLetsEncrypt'),
+		        '\" -style \"', variables('style'),
+		        '\" -nchbranch \"', variables('nchbranch'),
+		        '\" -containerName \"', variables('containerName'),
+		        '\" -AddTraefik \"', variables('AddTraefik'),
+		        '\"'
+		      )]"
+		    },
+		    "protectedSettings": {}
+		  }
+		}
     ],
     "outputs": {
 		"landingPage": {
